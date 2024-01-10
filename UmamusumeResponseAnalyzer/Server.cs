@@ -156,12 +156,7 @@ namespace UmamusumeResponseAnalyzer
                         if (dyn.data.venus_data_set.venus_race_condition is JArray)
                             dyn.data.venus_data_set.venus_race_condition = null;
                     }
-                    #endregion
-                    if (data.chara_info != null && data.home_info?.command_info_array != null && data.race_reward_info == null && !(data.chara_info.state == 2 || data.chara_info.state == 3)) //根据文本简单过滤防止重复、异常输出
-                    {
-                        if (Config.Get(Resource.ConfigSet_ShowCommandInfo))
-                            Handlers.ParseCommandInfo(dyn.ToObject<Gallop.SingleModeCheckEventResponse>());
-                    }
+                    #endregion                    
                     if (dyn.data.command_result != null) // 训练结果
                     {
                         if (dyn.data.command_result.result_state == 1) // 训练失败
@@ -170,7 +165,26 @@ namespace UmamusumeResponseAnalyzer
                             if (GameStats.stats[GameStats.currentTurn] != null)
                                 GameStats.stats[GameStats.currentTurn].isTrainingFailed = true;
                         }
+                        //手机及模拟器未hookQ包，在此由command_result解析上回合选项，替代ParseTrainingRequest
+                        else if (dyn.data.command_result.result_state == 2) //训练成功或者非训练
+                        if (GameStats.stats[GameStats.currentTurn] != null)
+                            {
+                                int rawId = dyn.data.command_result.command_id;
+#if DEBUG
+                                AnsiConsole.MarkupLine($"{rawId}");
+#endif
+                                int trainingId = GameGlobal.ToTrainId[rawId];
+                                AnsiConsole.MarkupLine($"玩家点击了[aqua]{GameGlobal.TrainNames[trainingId]}[/]{(trainingId < 107 ? "训练" : "")}");
+                                GameStats.stats[GameStats.currentTurn].playerChoice = trainingId;
+                                AnsiConsole.MarkupLine($"训练{rawId}已计入回合{GameStats.currentTurn}");
+                            }
                         EventLogger.Start(dyn.ToObject<Gallop.SingleModeCheckEventResponse>()); // 开始记录事件，跳过从上一次调用update到这里的所有事件和训练
+                    }
+                    // 为了避免提前解析CommandInfo更新GameStats.currentTurn而训练结果还没登记，这里交换顺序
+                    if (data.chara_info != null && data.home_info?.command_info_array != null && data.race_reward_info == null && !(data.chara_info.state == 2 || data.chara_info.state == 3)) //根据文本简单过滤防止重复、异常输出
+                    {
+                        if (Config.Get(Resource.ConfigSet_ShowCommandInfo))
+                            Handlers.ParseCommandInfo(dyn.ToObject<Gallop.SingleModeCheckEventResponse>());
                     }
                     if (data.chara_info != null && data.unchecked_event_array?.Count > 0)
                     {
@@ -182,17 +196,18 @@ namespace UmamusumeResponseAnalyzer
                         if (Config.Get(Resource.ConfigSet_MaximiumGradeSkillRecommendation) && data.chara_info.skill_tips_array != null)
                             Handlers.ParseSkillTipsResponse(dyn.ToObject<Gallop.SingleModeCheckEventResponse>());
                     }
-                    if (data.trained_chara_array != null && data.trained_chara_favorite_array != null && data.room_match_entry_chara_id_array != null)
-                    {
+                    if (data.trained_chara_array != null && data.room_match_entry_chara_id_array != null)
+                    //if (data.trained_chara_array != null && data.trained_chara_favorite_array != null && data.room_match_entry_chara_id_array != null)
+                    {                       
                         if (Config.Get(Resource.ConfigSet_ParseTrainedCharaLoadResponse))
-                            Handlers.ParseTrainedCharaLoadResponse(dyn.ToObject<Gallop.TrainedCharaLoadResponse>());
+                            Handlers.ParseTrainedCharaLoadResponse(dyn.ToObject<Gallop.TrainedCharaLoadResponse>());                     
                     }
                     if (data.user_info_summary != null && Config.Get(Resource.ConfigSet_ParseFriendSearchResponse))
                     {
                         if (data.practice_partner_info != null && data.support_card_data != null && data.follower_num != null && data.own_follow_num != null)
                             Handlers.ParseFriendSearchResponse(dyn.ToObject<Gallop.FriendSearchResponse>());
                         else if (data.user_info_summary.user_trained_chara != null)
-                            Handlers.ParseFriendSearchResponseSimple(dyn.ToObject<Gallop.FriendSearchResponse>());
+                            Handlers.ParseFriendSearchResponseSimple(dyn.ToObject<Gallop.FriendSearchResponse>());                           
                     }
                     if (data.opponent_info_array?.Count == 3)
                     {
@@ -312,7 +327,7 @@ namespace UmamusumeResponseAnalyzer
 #endif
                 if (Config.Get(Resource.ConfigSet_SaveResponseForDebug))
                 {
-                    var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "packets");
+                    var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "packets", "response");
                     if (Directory.Exists(directory))
                     {
                         foreach (var i in Directory.GetFiles(directory))
@@ -327,6 +342,7 @@ namespace UmamusumeResponseAnalyzer
                         Directory.CreateDirectory(directory);
                     }
                     File.WriteAllBytes($"{directory}/{DateTime.Now:yy-MM-dd HH-mm-ss-fff}R.msgpack", buffer);
+                    File.WriteAllText($"{directory}/Turn{GameStats.currentTurn}_{DateTime.Now:yy-MM-dd HH-mm-ss-fff}R.json", JObject.Parse(MessagePackSerializer.ConvertToJson(buffer)).ToString());
                 }
                 _ = Task.Run(() => ParseResponse(buffer));
             }
@@ -336,6 +352,25 @@ namespace UmamusumeResponseAnalyzer
                 Directory.CreateDirectory("packets");
                 File.WriteAllText($@"./packets/Turn{GameStats.currentTurn}_{DateTime.Now:yy-MM-dd HH-mm-ss-fff}Q.json", JObject.Parse(MessagePackSerializer.ConvertToJson(buffer.AsMemory()[170..])).ToString());
 #endif
+                if (Config.Get(Resource.ConfigSet_SaveRequestForDebug))
+                {
+                    var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "packets", "request");
+                    if (Directory.Exists(directory))
+                    {
+                        foreach (var i in Directory.GetFiles(directory))
+                        {
+                            var fileInfo = new FileInfo(i);
+                            if (fileInfo.CreationTime.AddDays(1) < DateTime.Now)
+                                fileInfo.Delete();
+                        }
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+                    File.WriteAllBytes($"{directory}/{DateTime.Now:yy-MM-dd HH-mm-ss-fff}Q.msgpack", buffer);
+                    File.WriteAllText($"{directory}/Turn{GameStats.currentTurn}_{DateTime.Now:yy-MM-dd HH-mm-ss-fff}Q.json", JObject.Parse(MessagePackSerializer.ConvertToJson(buffer.AsMemory()[170..])).ToString());
+                }
                 _ = Task.Run(() => ParseRequest(buffer[170..]));
             }
             else if (ctx.Request.RawUrl == "/notify/ping")

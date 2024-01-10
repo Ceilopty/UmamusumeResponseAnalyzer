@@ -39,4 +39,31 @@
             larc_nextThreeBuffs = [0, 0, 0];
         }
     }
+    public class UraPerson
+    {
+        public int personType;//0代表未加载（例如前两个回合的npc），1代表桐生院支援卡（R或SR都行），2代表普通支援卡，3代表npc人头，4理事长，5记者，6不带卡的桐生院，7帽毛支援卡。暂不支持其他友人/团队卡
+        //int16_t cardId;//支援卡id，不是支援卡就0
+        public int charaId;//npc人头的马娘id，不是npc就0，懒得写也可以一律0（只用于获得npc的名字）
+
+        public int cardIdInGame;// Game.cardParam里的支援卡序号，非支援卡为-1
+        public int friendship;//羁绊
+                              //bool atTrain[5];//是否在五个训练里。对于普通的卡只是one-hot或者全空，对于ssr佐岳可能有两个true
+                              //bool isShining;//是否闪彩。无法闪彩的卡或者npc恒为false
+        public bool isHint;//是否有hint。友人卡或者npc恒为false
+        public int cardRecord;//记录一些可能随着时间而改变的参数，例如根涡轮的固有
+
+        //bool larc_isLinkCard;//是否为link支援卡
+        //isShining, larc_isLinkCard, distribution 在ai里计算
+
+
+        public UraPerson()
+        {
+            personType = 0;
+            charaId = 0;
+            cardIdInGame = -1;
+            friendship = 0;
+            isHint = false;
+            cardRecord = 0;
+        }
+    }
 }

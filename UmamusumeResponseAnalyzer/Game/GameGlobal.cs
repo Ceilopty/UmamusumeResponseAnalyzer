@@ -29,7 +29,21 @@ namespace UmamusumeResponseAnalyzer.Game
             { 105, 105 },
             { 102, 102 },
             { 103, 103 },
-            { 106, 106 }
+            { 106, 106 },
+            { 701, 701 },
+            { 801, 801 },
+            { 301, 301 },
+            { 302, 302 },
+            { 303, 303 },
+            { 304, 304 },
+            { 305, 305 },
+            { 108, 108 },
+            { 109, 109 },
+            { 401, 401 },
+            { 390, 390 },
+            { 1106, 1106 },
+            { 1107, 1106 },
+            { 1108, 1106 },
         }.ToFrozenDictionary();
         public static readonly FrozenDictionary<int, int> ToTrainIndex = new Dictionary<int, int>
         {
@@ -55,7 +69,17 @@ namespace UmamusumeResponseAnalyzer.Game
             { 105, "耐" },
             { 102, "力" },
             { 103, "根" },
-            { 106, "智" }
+            { 106, "智" },
+            { 108, "吃" },
+            { 109, "出" },
+            { 701, "休" },
+            { 301, "川" },
+            { 302, "K" },
+            { 303, "神" },
+            { 304, "海" },
+            { 305, "泉" },
+            { 801, "医" },
+            { 1106, "观" },
         }.ToFrozenDictionary();
         public static readonly FrozenDictionary<int, string> GrandMastersSpiritNamesColored = new Dictionary<int, string>
         {

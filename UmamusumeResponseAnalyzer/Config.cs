@@ -43,10 +43,14 @@ namespace UmamusumeResponseAnalyzer
                 new(Resource.ConfigSet_LoadLocalizedData,true),
                 new("本地化文件路径",string.Empty,false),
             });
-            ConfigSet.Add("调试", ConfigItem.From(Resource.ConfigSet_SaveResponseForDebug));
+            ConfigSet.Add("调试", ConfigItem.From(
+                Resource.ConfigSet_SaveResponseForDebug,
+                Resource.ConfigSet_SaveRequestForDebug
+                ));
             ConfigSet.Add("其他", ConfigItem.From(
                 Resource.ConfigSet_DMMLaunch,
-                Resource.ConfigSet_WriteAIInfo
+                Resource.ConfigSet_WriteAIInfo,
+                Resource.ConfigSet_WriteEventInfo
                 ));
             if (File.Exists(CONFIG_FILEPATH))
             {
@@ -103,7 +107,9 @@ namespace UmamusumeResponseAnalyzer
                     i.Key == Resource.ConfigSet_EnableNetFilter ||
                     i.Key == Resource.ConfigSet_DMMLaunch ||
                     i.Key == Resource.ConfigSet_SaveResponseForDebug ||
-                    i.Key == Resource.ConfigSet_WriteAIInfo) //不默认开
+                    i.Key == Resource.ConfigSet_SaveRequestForDebug ||
+                    i.Key == Resource.ConfigSet_WriteAIInfo || //不默认开
+                    i.Key == Resource.ConfigSet_WriteEventInfo)
                 {
                     Configuration.Add(i.Key, new(i.Key, false));
                 }

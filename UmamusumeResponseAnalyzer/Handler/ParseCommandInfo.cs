@@ -138,6 +138,44 @@ namespace UmamusumeResponseAnalyzer.Handler
             var totalValueWithHalfPt = totalValue + 0.5 * @event.data.chara_info.skill_point;
             AnsiConsole.MarkupLine($"[aqua]总属性：{totalValue}[/]\t[aqua]总属性+0.5*pt：{totalValueWithHalfPt}[/]");
 
+            #region Ura
+            //计算训练等级
+            if (@event.IsScenario(ScenarioType.Ura))//预测训练等级
+            {
+                for (var i = 0; i < 5; i++)
+                {
+                    if (turnNum == 1)
+                    {
+                        turnStat.trainLevel[i] = 1;
+                        turnStat.trainLevelCount[i] = 0;
+                    }
+                    else
+                    {
+                        var lastTrainLevel = GameStats.stats[turnNum - 1]?.trainLevel[i] ?? 1;
+                        var lastTrainLevelCount = GameStats.stats[turnNum - 1]?.trainLevelCount[i] ?? 0;
+                        turnStat.trainLevel[i] = lastTrainLevel;
+                        turnStat.trainLevelCount[i] = lastTrainLevelCount;
+                        if (GameStats.stats[turnNum - 1] != null &&
+                            GameStats.stats[turnNum - 1].playerChoice == GameGlobal.TrainIds[i] &&
+                            !GameStats.stats[turnNum - 1].isTrainingFailed &&
+                            !((turnNum - 1 >= 37 && turnNum - 1 <= 40) || (turnNum - 1 >= 61 && turnNum - 1 <= 64))
+                            )//上回合点的这个训练，计数+1
+                            turnStat.trainLevelCount[i] += 1;
+                        if (turnStat.trainLevelCount[i] >= 4)
+                        {
+                            turnStat.trainLevelCount[i] -= 4;
+                            turnStat.trainLevel[i] += 1;
+                        }
+                        if (turnStat.trainLevel[i] >= 5)
+                        {
+                            turnStat.trainLevel[i] = 5;
+                            turnStat.trainLevelCount[i] = 0;
+                        }
+                    }
+                }
+            }
+            #endregion
+
             #region LArc
             //计算训练等级
             if (@event.IsScenario(ScenarioType.LArc))//预测训练等级
@@ -153,7 +191,7 @@ namespace UmamusumeResponseAnalyzer.Handler
                     {
                         var lastTrainLevel = GameStats.stats[turnNum - 1] != null ? GameStats.stats[turnNum - 1].trainLevel[i] : 1;
                         var lastTrainLevelCount = GameStats.stats[turnNum - 1] != null ? GameStats.stats[turnNum - 1].trainLevelCount[i] : 0;
-
+                 
                         turnStat.trainLevel[i] = lastTrainLevel;
                         turnStat.trainLevelCount[i] = lastTrainLevelCount;
                         if (GameStats.stats[turnNum - 1] != null &&
@@ -161,7 +199,7 @@ namespace UmamusumeResponseAnalyzer.Handler
                             !GameStats.stats[turnNum - 1].isTrainingFailed &&
                             !((turnNum - 1 >= 37 && turnNum - 1 <= 43) || (turnNum - 1 >= 61 && turnNum - 1 <= 67))
                             )//上回合点的这个训练，计数+1
-                            turnStat.trainLevelCount[i] += 1;
+                        turnStat.trainLevelCount[i] += 1;                            
                         if (turnStat.trainLevelCount[i] >= 4)
                         {
                             turnStat.trainLevelCount[i] -= 4;
@@ -452,7 +490,7 @@ namespace UmamusumeResponseAnalyzer.Handler
                     commandInfoArray = @event.data.venus_data_set.command_info_array;
                 else if (@event.IsScenario(ScenarioType.LArc)) // 凯旋门
                     commandInfoArray = @event.data.arc_data_set.command_info_array;
-                if (commandInfoArray is System.Collections.IEnumerable and not null)
+                if (commandInfoArray is System.Collections.IEnumerable and not null && !@event.IsScenario(ScenarioType.Ura)) //Ura
                     foreach (var item in commandInfoArray)
                         if (GameGlobal.ToTrainId.TryGetValue(item.command_id, out int value) && value == trainId)
                             foreach (var trainParam in item.params_inc_dec_info_array)
@@ -635,6 +673,12 @@ namespace UmamusumeResponseAnalyzer.Handler
                                     case 30160 or 10094: // 佐岳友人卡
                                         LArcfriendAppear[trainIdx] = true;
                                         turnStat.larc_zuoyueAtTrain[trainIdx] = true;
+                                        break;
+                                    case 20021 or 10022: // 桐生院友人卡
+                                        turnStat.ura_tsyAtTrain[trainIdx] = true;
+                                        break;
+                                    case 10021 or 30021: // 桐生院友人卡
+                                        turnStat.ura_lmAtTrain[trainIdx] = true;
                                         break;
                                 }
                             }
@@ -994,11 +1038,46 @@ namespace UmamusumeResponseAnalyzer.Handler
             if (@event.IsScenario(ScenarioType.LArc))
             {
                 var gameStatusToSend = new GameStatusSend_LArc(@event);
-                SubscribeAiInfo.Signal(gameStatusToSend);
+                SubscribeAiInfo_LArc.Signal(gameStatusToSend);
 
                 if (Config.Get(Localization.Resource.ConfigSet_WriteAIInfo))
                 {
                     var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData");
+                    Directory.CreateDirectory(currentGSdirectory);
+
+                    var success = false;
+                    var tried = 0;
+                    do
+                    {
+                        try
+                        {
+                            var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }; // 去掉空值避免C++端抽风
+                            File.WriteAllText($@"{currentGSdirectory}/thisTurn.json", JsonConvert.SerializeObject(gameStatusToSend, Formatting.Indented, settings));
+                            File.WriteAllText($@"{currentGSdirectory}/turn{@event.data.chara_info.turn}.json", JsonConvert.SerializeObject(gameStatusToSend, Formatting.Indented, settings));
+                            success = true; // 写入成功，跳出循环
+                            break;
+                        }
+                        catch
+                        {
+                            tried++;
+                            AnsiConsole.MarkupLine("[yellow]写入失败，0.5秒后重试...[/]");
+                            await Task.Delay(500); // 等待0.5秒
+                        }
+                    } while (!success && tried < 10);
+                    if (!success)
+                    {
+                        AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/thisTurn.json失败！[/]");
+                    }
+                }
+            }
+            if (@event.IsScenario(ScenarioType.Ura))
+            {
+                var gameStatusToSend = new GameStatusSend_Ura(@event);
+                SubscribeAiInfo_Ura.Signal(gameStatusToSend);
+
+                if (Config.Get(Localization.Resource.ConfigSet_WriteAIInfo))
+                {
+                    var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData", "Turn");
                     Directory.CreateDirectory(currentGSdirectory);
 
                     var success = false;

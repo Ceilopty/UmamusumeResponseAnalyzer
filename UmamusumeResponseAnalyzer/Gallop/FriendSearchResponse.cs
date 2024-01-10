@@ -42,7 +42,42 @@ namespace Gallop
 			public int enable_circle_scout; // 0x60
 		}
 	}
-	[MessagePackObject]
+    [MessagePackObject]
+    public class FriendSearchResponseAlter
+    {
+        [Key("data")]
+        public CommonResponse data; // 0x18
+
+        [MessagePackObject]
+        public class CommonResponse
+        {
+            [Key("friend_info")]
+            public UserFriend friend_info; // 0x10
+            [Key("user_info_summary")]
+            public UserInfoAtFriend user_info_summary; // 0x18
+            [Key("practice_partner_info")]
+            public TrainedChara practice_partner_info; // 0x20
+            [Key("directory_chara_info")]
+            public TrainedChara[] directory_chara_info; // 0x28
+            [Key("directory_card_array")]
+            public DirectoryCard[] directory_card_array; // 0x30
+            [Key("support_card_data")]
+            public UserSupportCard support_card_data; // 0x38
+            [Key("trophy_num_info")]
+            public TrophyNumInfo trophy_num_info; // 0x40
+            [Key("release_num_info")]
+            public ReleaseNumInfo release_num_info; // 0x48
+            [Key("team_stadium_user")]
+            public TeamStadiumUser team_stadium_user; // 0x50
+            [Key("follower_num")]
+            public int follower_num; // 0x58
+            [Key("own_follow_num")]
+            public int own_follow_num; // 0x5C
+            [Key("enable_circle_scout")]
+            public int enable_circle_scout; // 0x60
+        }
+    }
+    [MessagePackObject]
 	public class UserFriend
     {
 		[Key("friend_viewer_id")]

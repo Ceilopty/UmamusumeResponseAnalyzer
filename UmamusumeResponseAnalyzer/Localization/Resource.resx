@@ -247,7 +247,7 @@
     <value>正在从GitHub下载最新的talentskillsets.br</value>
   </data>
   <data name="ConfigSet_SaveResponseForDebug" xml:space="preserve">
-    <value>保存用于调试的通讯包</value>
+    <value>保存用于调试的回复通讯包</value>
   </data>
   <data name="ConfigSet_ForceUseGithubToUpdate" xml:space="preserve">
     <value>强制使用GitHub更新</value>
@@ -305,5 +305,11 @@
   </data>
   <data name="ConfigSet_WriteAIInfo" xml:space="preserve">
     <value>回合信息写入文件以方便AI读取</value>
+  </data>
+  <data name="ConfigSet_WriteEventInfo" xml:space="preserve">
+    <value>事件信息写入文件以方便AI读取</value>
+  </data>
+  <data name="ConfigSet_SaveRequestForDebug" xml:space="preserve">
+    <value>保存用于调试的请求通讯包</value>
   </data>
 </root>

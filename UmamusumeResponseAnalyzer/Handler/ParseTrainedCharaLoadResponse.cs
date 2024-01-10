@@ -13,8 +13,8 @@ namespace UmamusumeResponseAnalyzer.Handler
         public static void ParseTrainedCharaLoadResponse(Gallop.TrainedCharaLoadResponse @event)
         {
             var data = @event.data;
-            var fav_ids = data.trained_chara_favorite_array.Select(x => x.trained_chara_id).ToList();
-            var chara = data.trained_chara_array.Where(x => x.is_locked == 1 && fav_ids.Contains(x.trained_chara_id));
+            var fav_ids = data.trained_chara_favorite_array?.Select(x => x.trained_chara_id).ToList(); //现在还没fav_array
+            var chara = data.trained_chara_array.Where(x => x.is_locked == 1 && (fav_ids == null || fav_ids.Contains(x.trained_chara_id)));
             var win_saddle_result = new List<(string Name, int WinSaddleBonus, string WinSaddleArray, int Score)>();
             foreach (var i in chara)
             {
