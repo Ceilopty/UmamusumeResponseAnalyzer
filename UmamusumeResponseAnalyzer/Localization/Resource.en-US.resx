@@ -223,7 +223,7 @@
     <value>ParseMonthlyRace</value>
   </data>
   <data name="ConfigSet_SaveResponseForDebug" xml:space="preserve">
-    <value>Save packets for debugging</value>
+    <value>Save response packets for debugging</value>
   </data>
   <data name="ConfigSet_ShowCommandInfo" xml:space="preserve">
     <value>Show Command Info</value>
@@ -305,6 +305,12 @@
   </data>
   <data name="ConfigSet_WriteAIInfo" xml:space="preserve">
     <value>Write turn stats for external plugins reading</value>
+  </data>
+  <data name="ConfigSet_WriteEventInfo" xml:space="preserve">
+    <value>Write event stats for external plugins reading</value>
+  </data>
+  <data name="ConfigSet_SaveRequestForDebug" xml:space="preserve">
+    <value>Save request packets for debugging</value>
   </data>
   <data name="ConfigSet_DisableSelectIndex" xml:space="preserve">
     <value>Hide select_index</value>

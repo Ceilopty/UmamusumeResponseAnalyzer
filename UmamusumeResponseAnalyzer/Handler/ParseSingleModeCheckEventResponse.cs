@@ -7,20 +7,24 @@ using System.Threading.Tasks;
 using UmamusumeResponseAnalyzer.Entities;
 using UmamusumeResponseAnalyzer.Localization;
 using UmamusumeResponseAnalyzer.Game;
+using UmamusumeResponseAnalyzer.AI;
+using Newtonsoft.Json;
 
 namespace UmamusumeResponseAnalyzer.Handler
 {
     public static partial class Handlers
     {
-        public static void ParseSingleModeCheckEventResponse(Gallop.SingleModeCheckEventResponse @event)
+        public static async void ParseSingleModeCheckEventResponse(Gallop.SingleModeCheckEventResponse @event)
         {
             // 这时当前事件还没有生效，先显示上一个事件的收益
             EventLogger.Update(@event);
 
+            int eventCount = 0;
             foreach (var i in @event.data.unchecked_event_array)
             {
+                eventCount += 1;
                 if (GameStats.stats[GameStats.currentTurn] != null)
-                {
+                {                    
                     if (i.story_id == 830137001)//第一次点击女神
                     {
                         GameStats.stats[GameStats.currentTurn].venus_isVenusCountConcerned = false;
@@ -139,8 +143,42 @@ namespace UmamusumeResponseAnalyzer.Handler
                     AnsiConsole.Write(mainTree);
 
                 }
-            }
+                var eventToSend = new EventSend(@event, eventCount);
+                if (Config.Get(Resource.ConfigSet_WriteEventInfo) && i?.event_contents_info?.choice_array.Length > 1)
+                {
+                    var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData", "Event");
+                    Directory.CreateDirectory(currentGSdirectory);
 
+                    var success = false;
+                    var tried = 0;
+                    do
+                    {
+                        try
+                        {
+                            var settings = new JsonSerializerSettings
+                            { 
+                                NullValueHandling = NullValueHandling.Ignore,
+                                Formatting = Formatting.Indented,
+                            }; // 去掉空值避免C++端抽风
+                            File.WriteAllText($@"{currentGSdirectory}/thisTurnThisEvent.json", JsonConvert.SerializeObject(eventToSend, settings));
+                            File.WriteAllText($@"{currentGSdirectory}/turn{@event.data.chara_info.turn}Event{eventCount}.json", JsonConvert.SerializeObject(eventToSend, settings));
+                            success = true; // 写入成功，跳出循环
+                            break;
+                        }
+                        catch
+                        {
+                            tried++;
+                            AnsiConsole.MarkupLine("[yellow]写入失败，0.5秒后重试...[/]");
+                            await Task.Delay(500); // 等待0.5秒
+                        }
+
+                    } while (!success && tried < 10);
+                    if (!success)
+                    {
+                        AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/thisTurn.json失败！[/]");
+                    }
+                }
+            }
         }
     }
 }

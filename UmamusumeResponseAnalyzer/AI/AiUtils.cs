@@ -19,9 +19,17 @@ namespace UmamusumeResponseAnalyzer.AI
 
             int turn = @event.data.chara_info.turn;
             //向未来借一些pt
-            var borrowPtFromFuture = turn >= 60 ? 300 + 80 * (67 - turn) :
-                turn >= 40 ? 300 + 80 * (67 - 60) + 40 * (60 - turn) :
-                300 + 80 * (67 - 60) + 40 * (60 - 40);
+            var totalTurns = @event.IsScenario(ScenarioType.LArc) ? 67 : 78;
+            int[] turnPts = [
+                @event.IsScenario(ScenarioType.Ura) ? 70 : 300,
+                @event.IsScenario(ScenarioType.Ura)? 40 : 80,
+                @event.IsScenario(ScenarioType.Ura) ? 10 : 40];
+            int[] turningTurns = [
+                @event.IsScenario(ScenarioType.Ura) ? 6 : 7,
+                @event.IsScenario(ScenarioType.Ura) ? 15 : 27]; //假设最后[0]回合每回合涨↑[1]PT，[1]回合每回合涨↑[2]PT
+            var borrowPtFromFuture = turn >= (totalTurns - turningTurns[0]) ? turnPts[0] + turnPts[1] * (totalTurns - turn) :
+                turn >= (totalTurns - turningTurns[1]) ? turnPts[0] + turnPts[1] * (turningTurns[0]) + turnPts[2] * (totalTurns - turningTurns[0] - turn) :
+                turnPts[0] + turnPts[1] * turningTurns[0] + turnPts[2] * (turningTurns[1] - turningTurns[0]);
 
             var originSP = @event.data.chara_info.skill_point;
             var totalSP = @event.data.chara_info.skill_point + borrowPtFromFuture;

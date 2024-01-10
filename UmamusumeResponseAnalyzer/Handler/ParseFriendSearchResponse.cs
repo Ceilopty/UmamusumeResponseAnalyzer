@@ -50,15 +50,31 @@ namespace UmamusumeResponseAnalyzer.Handler
                 AnsiConsole.WriteLine($"胜鞍详细：{string.Join(',', charaWinSaddle.Select(x => Database.SaddleNames[x]))}{Environment.NewLine}");
             var tree = new Tree("因子");
 
-            var max = chara.factor_info_array.Select(x => x.factor_id).Concat(chara.succession_chara_array[0].factor_info_array.Select(x => x.factor_id))
+            if (chara.factor_info_array != null)
+            {
+                var max = chara.factor_info_array.Select(x => x.factor_id).Concat(chara.succession_chara_array[0].factor_info_array.Select(x => x.factor_id))
                 .Concat(chara.succession_chara_array[1].factor_info_array.Select(x => x.factor_id))
                 .Where((x, index) => index % 2 == 0)
                 .Max(x => GetRenderWidth(Database.FactorIds[x]));
-            var representative = AddFactors("代表", chara.factor_info_array.Select(x => x.factor_id).ToArray(), max);
-            var inheritanceA = AddFactors($"祖辈@{chara.succession_chara_array[0].owner_viewer_id}", chara.succession_chara_array[0].factor_info_array.Select(x => x.factor_id).ToArray(), max);
-            var inheritanceB = AddFactors($"祖辈@{chara.succession_chara_array[1].owner_viewer_id}", chara.succession_chara_array[1].factor_info_array.Select(x => x.factor_id).ToArray(), max);
+                var representative = AddFactors("代表", chara.factor_info_array.Select(x => x.factor_id).ToArray(), max);
+                var inheritanceA = AddFactors($"祖辈@{chara.succession_chara_array[0].owner_viewer_id}", chara.succession_chara_array[0].factor_info_array.Select(x => x.factor_id).ToArray(), max);
+                var inheritanceB = AddFactors($"祖辈@{chara.succession_chara_array[1].owner_viewer_id}", chara.succession_chara_array[1].factor_info_array.Select(x => x.factor_id).ToArray(), max);
 
-            tree.AddNodes(representative, inheritanceA, inheritanceB);
+                tree.AddNodes(representative, inheritanceA, inheritanceB);
+            }
+            else
+            {
+                var max = chara.factor_id_array.Concat(chara.succession_chara_array[0].factor_id_array)
+                .Concat(chara.succession_chara_array[1].factor_id_array)
+                .Where((x, index) => index % 2 == 0)
+                    .Max(x => GetRenderWidth(Database.FactorIds[x]));
+                    var representative = AddFactors("代表", chara.factor_id_array, max);
+                var inheritanceA = AddFactors($"祖辈@{chara.succession_chara_array[0].owner_viewer_id}", chara.succession_chara_array[0].factor_id_array, max);
+                var inheritanceB = AddFactors($"祖辈@{chara.succession_chara_array[1].owner_viewer_id}", chara.succession_chara_array[1].factor_id_array, max);
+
+                tree.AddNodes(representative, inheritanceA, inheritanceB);
+            }
+            
             AnsiConsole.Write(tree);
             AnsiConsole.Write(new Rule());
         }
@@ -71,15 +87,25 @@ namespace UmamusumeResponseAnalyzer.Handler
             var tree = new Tree("因子");
 
             var i = data.user_info_summary.user_trained_chara;
-            var max = i.factor_info_array.Select(x => x.factor_id)
+            if (i.factor_info_array != null)
+            {
+                var max = i.factor_info_array.Select(x => x.factor_id)
                 .Where((x, index) => index % 2 == 0)
                 .Max(x => GetRenderWidth(Database.FactorIds[x]));
-            var representative = AddFactors("代表", i.factor_info_array.Select(x => x.factor_id).ToArray(), max);
-
-            tree.AddNodes(representative);
+                var representative = AddFactors("代表", i.factor_info_array.Select(x => x.factor_id).ToArray(), max);
+                tree.AddNodes(representative);
+            }
+            else
+            {
+                var max = i.factor_id_array
+                .Where((x, index) => index % 2 == 0)
+                .Max(x => GetRenderWidth(Database.FactorIds[x]));
+                var representative = AddFactors("代表", i.factor_id_array, max);
+                tree.AddNodes(representative);
+            }            
             AnsiConsole.Write(tree);
             AnsiConsole.Write(new Rule());
-        }
+        }      
         static Tree AddFactors(string title, int[] id_array, int max)
         {
             var tree = new Tree(title);
