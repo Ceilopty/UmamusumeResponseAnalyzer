@@ -547,12 +547,13 @@ namespace UmamusumeResponseAnalyzer.AI
         public SkillTips[] skillTips;//已获得启示
         public int[] chara_effect_id_array;//状态
         public int[] available_command_array;//所有有效的出行
+        public int[][] proper_info;//适性信息，用于技能选择
 
         public GameStatusSend_Ura(Gallop.SingleModeCheckEventResponse @event)
         {
 
             if ((@event.data.unchecked_event_array != null && @event.data.unchecked_event_array.Length > 0) || @event.data.race_start_info != null) return;
-
+            
             skills = @event.data.chara_info.skill_array;
             skillTips = @event.data.chara_info.skill_tips_array;
             chara_effect_id_array = @event.data.chara_info.chara_effect_id_array;
@@ -669,27 +670,32 @@ namespace UmamusumeResponseAnalyzer.AI
                         ura_tsyType = 1;
                         persons[9].cardIdInGame = i;
                         headIdConvert[i + 1] = 9;
+                        persons[9].trainType = 0;
                     }
                     else if (cardId[i] / 10 == 10022)//r桐生院
                     {
                         ura_tsyType = 2;
                         persons[9].cardIdInGame = i;
                         headIdConvert[i + 1] = 9;
+                        persons[9].trainType = 0;
                     }
                     else if (cardId[i] / 10 == 30021)//ssr绿帽
                     {
                         ura_lmType = 1;
                         persons[6].cardIdInGame = i;
                         headIdConvert[i + 1] = 6;
+                        persons[6].trainType = 0;
                     }
                     else if (cardId[i] / 10 == 10021)//r绿帽
                     {
                         ura_lmType = 2;
                         persons[6].cardIdInGame = i;
                         headIdConvert[i + 1] = 6;
+                        persons[6].trainType = 0;
                     }
                     else
                     {
+                        persons[normalCardCount].trainType = Database.Names.GetSupportCard(cardId[i] / 10).Type;
                         persons[normalCardCount].cardIdInGame = i;
                         headIdConvert[i + 1] = normalCardCount;
                         normalCardCount += 1;
@@ -915,6 +921,22 @@ namespace UmamusumeResponseAnalyzer.AI
                     failRate[t] = stats.FailureRate;
                 }//for
             }
+            proper_info = 
+            [
+                [@event.data.chara_info.proper_ground_turf, @event.data.chara_info.proper_ground_dirt],
+                [
+                    @event.data.chara_info.proper_distance_short,
+                    @event.data.chara_info.proper_distance_mile,
+                    @event.data.chara_info.proper_distance_middle,
+                    @event.data.chara_info.proper_distance_long
+                ],
+                [
+                    @event.data.chara_info.proper_running_style_nige,
+                    @event.data.chara_info.proper_running_style_senko,
+                    @event.data.chara_info.proper_running_style_sashi,
+                    @event.data.chara_info.proper_running_style_oikomi
+                ]
+            ];
         }
     }
     public class EventSend {
