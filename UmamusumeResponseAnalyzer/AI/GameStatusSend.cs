@@ -548,6 +548,7 @@ namespace UmamusumeResponseAnalyzer.AI
         public int[] chara_effect_id_array;//状态
         public int[] available_command_array;//所有有效的出行
         public int[][] proper_info;//适性信息，用于技能选择
+        public int talent_level;//觉醒等级，用于计算觉醒技能
 
         public GameStatusSend_Ura(Gallop.SingleModeCheckEventResponse @event)
         {
@@ -559,6 +560,7 @@ namespace UmamusumeResponseAnalyzer.AI
             chara_effect_id_array = @event.data.chara_info.chara_effect_id_array;
 
             umaId = @event.data.chara_info.card_id + 1000000 * @event.data.chara_info.rarity;
+            talent_level = @event.data.chara_info.talent_level;
             int turnNum = @event.data.chara_info.turn;//游戏里回合数从1开始
             turn = turnNum - 1;//ai里回合数从0开始
             vital = @event.data.chara_info.vital;
