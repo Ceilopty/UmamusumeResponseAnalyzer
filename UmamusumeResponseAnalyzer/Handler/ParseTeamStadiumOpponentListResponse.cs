@@ -136,7 +136,11 @@ namespace UmamusumeResponseAnalyzer.Handler
             //设置宽度，Windows的CMD在大小<160时无法正常显示竞技场对手属性，会死循环
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (Console.BufferWidth < 160 || Console.WindowWidth < 160))
             {
-                Console.BufferWidth = 160;
+                int[] x = [
+                    Console.WindowWidth,
+                    Console.LargestWindowWidth,
+                    160];  // 破电脑1920宽138就溢出了，姑且改下。
+                Console.BufferWidth = x.Order().ElementAt(1);
                 Console.SetWindowSize(Console.BufferWidth, Console.WindowHeight);
             }
             AnsiConsole.Write(container);

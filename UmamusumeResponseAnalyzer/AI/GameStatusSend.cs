@@ -553,7 +553,7 @@ namespace UmamusumeResponseAnalyzer.AI
         public GameStatusSend_Ura(Gallop.SingleModeCheckEventResponse @event)
         {
 
-            if ((@event.data.unchecked_event_array != null && @event.data.unchecked_event_array.Length > 0) || @event.data.race_start_info != null) return;
+            //if ((@event.data.unchecked_event_array != null && @event.data.unchecked_event_array.Length > 0) || @event.data.race_start_info != null) return;
             
             skills = @event.data.chara_info.skill_array;
             skillTips = @event.data.chara_info.skill_tips_array;
@@ -622,16 +622,40 @@ namespace UmamusumeResponseAnalyzer.AI
 
             isPositiveThinking = @event.data.chara_info.chara_effect_id_array.Contains(25);
 
+            available_command_array = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
             //bool LArcIsAbroad = (turnNum >= 37 && turnNum <= 43) || (turnNum >= 61 && turnNum <= 67);
 
             trainLevelCount = new int[5];
             for (int i = 0; i < 5; i++)
             {
-                trainLevelCount[i] = (GameStats.stats[turnNum].trainLevel[i] - 1) * 4 + GameStats.stats[turnNum].trainLevelCount[i];
+                trainLevelCount[i] = (GameStats.stats[turnNum]?.trainLevel[i]??1 - 1) * 4 + GameStats.stats[turnNum]?.trainLevelCount[i]??0;
             }
 
             motivationDropCount = GameStats.m_motDropCount;
-
+            persons = new UraPerson[10];
+            personDistribution = new int[5, 5];
+            for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
+                    personDistribution[i, j] = -1;
+            trainValue = new int[5, 7];
+            failRate = new int[5];
+            proper_info =
+                [
+                    [@event.data.chara_info.proper_ground_turf, @event.data.chara_info.proper_ground_dirt],
+                    [
+                        @event.data.chara_info.proper_distance_short,
+                        @event.data.chara_info.proper_distance_mile,
+                        @event.data.chara_info.proper_distance_middle,
+                        @event.data.chara_info.proper_distance_long
+                    ],
+                    [
+                        @event.data.chara_info.proper_running_style_nige,
+                        @event.data.chara_info.proper_running_style_senko,
+                        @event.data.chara_info.proper_running_style_sashi,
+                        @event.data.chara_info.proper_running_style_oikomi
+                    ]
+                ];
+            if (@event.data.home_info == null) return;
 
             //从游戏json的id到ai的人头编号的换算
             Dictionary<int, int> headIdConvert = new Dictionary<int, int>();
@@ -644,7 +668,6 @@ namespace UmamusumeResponseAnalyzer.AI
 
             int ura_tsyType = 0;
             int ura_lmType = 0;
-            persons = new UraPerson[10];
             for (int i = 0; i < 10; i++)
                 persons[i] = new UraPerson();
             normalCardCount = 0;
@@ -803,16 +826,7 @@ namespace UmamusumeResponseAnalyzer.AI
             }
 
 
-
-            personDistribution = new int[5, 5];
-            for (int i = 0; i < 5; i++)
-                for (int j = 0; j < 5; j++)
-                    personDistribution[i, j] = -1;
-
-
-
             int available_command_num = 0;
-            available_command_array = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
             foreach (var train in @event.data.home_info.command_info_array)
             {
                 if (train.is_enable > 0)
@@ -836,8 +850,6 @@ namespace UmamusumeResponseAnalyzer.AI
             }
 
 
-            trainValue = new int[5, 7];
-            failRate = new int[5];
             {
                 var currentVital = @event.data.chara_info.vital;
                 //maxVital = @event.data.chara_info.max_vital;
@@ -923,22 +935,6 @@ namespace UmamusumeResponseAnalyzer.AI
                     failRate[t] = stats.FailureRate;
                 }//for
             }
-            proper_info = 
-            [
-                [@event.data.chara_info.proper_ground_turf, @event.data.chara_info.proper_ground_dirt],
-                [
-                    @event.data.chara_info.proper_distance_short,
-                    @event.data.chara_info.proper_distance_mile,
-                    @event.data.chara_info.proper_distance_middle,
-                    @event.data.chara_info.proper_distance_long
-                ],
-                [
-                    @event.data.chara_info.proper_running_style_nige,
-                    @event.data.chara_info.proper_running_style_senko,
-                    @event.data.chara_info.proper_running_style_sashi,
-                    @event.data.chara_info.proper_running_style_oikomi
-                ]
-            ];
         }
     }
     public class EventSend {

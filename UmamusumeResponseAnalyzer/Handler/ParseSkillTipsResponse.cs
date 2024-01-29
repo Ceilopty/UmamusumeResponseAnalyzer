@@ -1,4 +1,7 @@
-﻿using Spectre.Console;
+﻿using Newtonsoft.Json;
+using Spectre.Console;
+using UmamusumeResponseAnalyzer.AI;
+using UmamusumeResponseAnalyzer.Communications.Subscriptions;
 using UmamusumeResponseAnalyzer.Entities;
 using UmamusumeResponseAnalyzer.Game;
 using UmamusumeResponseAnalyzer.Localization;
@@ -7,7 +10,7 @@ namespace UmamusumeResponseAnalyzer.Handler
 {
     public static partial class Handlers
     {
-        public static void ParseSkillTipsResponse(Gallop.SingleModeCheckEventResponse @event)
+        public static async void ParseSkillTipsResponse(Gallop.SingleModeCheckEventResponse @event)
         {
             var skills = Database.Skills.Apply(@event.data.chara_info);
             var tips = CalculateSkillScoreCost(@event, skills, true);
@@ -140,6 +143,50 @@ namespace UmamusumeResponseAnalyzer.Handler
                 AnsiConsole.MarkupLine($"[green]{t * 50}pt技能的期望性价比：{eff:F3}[/]");
             }
             #endregion
+
+            if (@event.IsScenario(ScenarioType.Ura))
+            {
+                try
+                {
+                    var gameStatusToSend = new GameStatusSend_Ura(@event);
+                    if (Config.Get(Localization.Resource.ConfigSet_WriteAIInfo))
+                    {
+                        var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData", "Turn");
+                        Directory.CreateDirectory(currentGSdirectory);
+
+                        var success = false;
+                        var tried = 0;
+                        do
+                        {
+                            try
+                            {
+                                var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }; // 去掉空值避免C++端抽风
+                                File.WriteAllText($@"{currentGSdirectory}/thisTurn.json", JsonConvert.SerializeObject(gameStatusToSend, Formatting.Indented, settings));
+                                File.WriteAllText($@"{currentGSdirectory}/turn{@event.data.chara_info.turn}.json", JsonConvert.SerializeObject(gameStatusToSend, Formatting.Indented, settings));
+                                success = true; // 写入成功，跳出循环
+                                break;
+                            }
+                            catch
+                            {
+                                tried++;
+                                AnsiConsole.MarkupLine("[yellow]写入失败，0.5秒后重试...[/]");
+                                await Task.Delay(500); // 等待0.5秒
+                            }
+                        } while (!success && tried < 10);
+                        if (!success)
+                        {
+                            AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/thisTurn.json失败！[/]");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
+#if DEBUG
+                    throw;
+#endif
+                }
+            } //if
         }
         public static bool ReplaceTalentSkillWithUpgradeSkill(Gallop.SingleModeCheckEventResponse @event, SkillManager skills, List<SkillData> tips, IEnumerable<TalentSkillData>? upgradableTalentSkills, List<SkillData>? willLearnSkills = null)
         {

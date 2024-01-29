@@ -138,34 +138,6 @@ namespace UmamusumeResponseAnalyzer.Handler
             var totalValueWithHalfPt = totalValue + 0.5 * @event.data.chara_info.skill_point;
             AnsiConsole.MarkupLine($"[aqua]总属性：{totalValue}[/]\t[aqua]总属性+0.5*pt：{totalValueWithHalfPt}[/]");
 
-            #region 显示出行信息
-            foreach (var train in @event.data.home_info.command_info_array)
-            {
-                if (!GameGlobal.ToTrainIndex.ContainsKey(train.command_id) && train.is_enable > 0)//不是正常训练
-                    switch (train.command_type)
-                    {
-                        case 3:
-                            if(train.command_id < 390)
-                                AnsiConsole.MarkupLine($"出行[aqua]{GameGlobal.TrainNames[train.command_id]}[/]");
-                            break;
-                        case 4:
-                            break;
-                        case 7:
-                            break;
-                        case 8:
-                            break;
-                    }
-#if DEBUG
-                {
-                    AnsiConsole.Markup($"{(train.is_enable > 0 ? "[green]" : "[red]")}{train.command_id}[/],");
-                }
-#endif
-            }
-#if DEBUG
-            AnsiConsole.MarkupLine($"");
-#endif
-            #endregion
-
             #region Ura
             //计算训练等级
             if (@event.IsScenario(ScenarioType.Ura))//预测训练等级
