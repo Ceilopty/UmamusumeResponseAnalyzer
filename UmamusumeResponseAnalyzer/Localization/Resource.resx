@@ -309,6 +309,9 @@
   <data name="ConfigSet_WriteEventInfo" xml:space="preserve">
     <value>事件信息写入文件以方便AI读取</value>
   </data>
+  <data name="ConfigSet_WriteTeamStadiumInfo" xml:space="preserve">
+    <value>竞技场信息写入文件以方便AI读取</value>
+  </data>
   <data name="ConfigSet_SaveRequestForDebug" xml:space="preserve">
     <value>保存用于调试的请求通讯包</value>
   </data>

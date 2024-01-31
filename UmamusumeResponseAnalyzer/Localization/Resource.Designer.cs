@@ -61,7 +61,7 @@ namespace UmamusumeResponseAnalyzer.Localization {
         }
         
         /// <summary>
-        ///   查找类似 隐藏SelectIndex 的本地化字符串。
+        ///   Looks up a localized string similar to 隐藏SelectIndex.
         /// </summary>
         public static string ConfigSet_DisableSelectIndex {
             get {
@@ -70,7 +70,7 @@ namespace UmamusumeResponseAnalyzer.Localization {
         }
         
         /// <summary>
-        ///   查找类似 跳过DMM启动游戏 的本地化字符串。
+        ///   Looks up a localized string similar to 跳过DMM启动游戏.
         /// </summary>
         public static string ConfigSet_DMMLaunch {
             get {
@@ -228,6 +228,15 @@ namespace UmamusumeResponseAnalyzer.Localization {
         public static string ConfigSet_WriteEventInfo {
             get {
                 return ResourceManager.GetString("ConfigSet_WriteEventInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 竞技场信息写入文件以方便AI读取.
+        /// </summary>
+        public static string ConfigSet_WriteTeamStadiumInfo {
+            get {
+                return ResourceManager.GetString("ConfigSet_WriteTeamStadiumInfo", resourceCulture);
             }
         }
         

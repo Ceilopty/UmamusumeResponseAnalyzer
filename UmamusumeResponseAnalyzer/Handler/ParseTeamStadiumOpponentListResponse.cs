@@ -1,4 +1,5 @@
 ﻿using Gallop;
+using Newtonsoft.Json;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
@@ -6,13 +7,15 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using UmamusumeResponseAnalyzer.AI;
+using UmamusumeResponseAnalyzer.Communications.Subscriptions;
 
 namespace UmamusumeResponseAnalyzer.Handler
 {
     public static partial class Handlers
     {
 
-        public static void ParseTeamStadiumOpponentListResponse(Gallop.TeamStadiumOpponentListResponse @event)
+        public static async void ParseTeamStadiumOpponentListResponse(Gallop.TeamStadiumOpponentListResponse @event)
         {
             var data = @event.data;
             var container = new Table
@@ -157,6 +160,45 @@ namespace UmamusumeResponseAnalyzer.Handler
                 8 => "S",
                 _ => "错误"
             };
+            try
+            {
+                var gameStatusToSend = new TeamStadiumSend(@event);
+                if (Config.Get(Localization.Resource.ConfigSet_WriteAIInfo))
+                {
+                    var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData");
+                    Directory.CreateDirectory(currentGSdirectory);
+
+                    var success = false;
+                    var tried = 0;
+                    do
+                    {
+                        try
+                        {
+                            var settings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }; // 去掉空值避免C++端抽风
+                            File.WriteAllText($@"{currentGSdirectory}/TeamStadium.json", JsonConvert.SerializeObject(gameStatusToSend, Formatting.Indented, settings));
+                            success = true; // 写入成功，跳出循环
+                            break;
+                        }
+                        catch
+                        {
+                            tried++;
+                            AnsiConsole.MarkupLine("[yellow]写入失败，0.5秒后重试...[/]");
+                            await Task.Delay(500); // 等待0.5秒
+                        }
+                    } while (!success && tried < 10);
+                    if (!success)
+                    {
+                        AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/thisTurn.json失败！[/]");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
+#if DEBUG
+                throw;
+#endif
+            }
         }
     }
 }

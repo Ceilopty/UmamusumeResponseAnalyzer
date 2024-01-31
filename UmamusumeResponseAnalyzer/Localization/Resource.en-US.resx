@@ -309,6 +309,9 @@
   <data name="ConfigSet_WriteEventInfo" xml:space="preserve">
     <value>Write event stats for external plugins reading</value>
   </data>
+  <data name="ConfigSet_WriteTeamStadiumInfo" xml:space="preserve">
+    <value>Write team stadium stats for external plugins reading</value>
+  </data>
   <data name="ConfigSet_SaveRequestForDebug" xml:space="preserve">
     <value>Save request packets for debugging</value>
   </data>

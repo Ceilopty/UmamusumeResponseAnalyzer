@@ -51,7 +51,8 @@ namespace UmamusumeResponseAnalyzer
                 Resource.ConfigSet_DMMLaunch,
                 Resource.ConfigSet_DisableSelectIndex,
                 Resource.ConfigSet_WriteAIInfo,
-                Resource.ConfigSet_WriteEventInfo
+                Resource.ConfigSet_WriteEventInfo,
+                Resource.ConfigSet_WriteTeamStadiumInfo
                 ));
             if (File.Exists(CONFIG_FILEPATH))
             {
@@ -110,7 +111,8 @@ namespace UmamusumeResponseAnalyzer
                     i.Key == Resource.ConfigSet_SaveResponseForDebug ||
                     i.Key == Resource.ConfigSet_SaveRequestForDebug ||
                     i.Key == Resource.ConfigSet_WriteAIInfo || //不默认开
-                    i.Key == Resource.ConfigSet_WriteEventInfo)
+                    i.Key == Resource.ConfigSet_WriteEventInfo ||
+                    i.Key == Resource.ConfigSet_WriteTeamStadiumInfo)
                 {
                     Configuration.Add(i.Key, new(i.Key, false));
                 }
