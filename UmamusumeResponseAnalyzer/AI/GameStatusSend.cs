@@ -545,6 +545,7 @@ namespace UmamusumeResponseAnalyzer.AI
         //以下为自定义
         public Gallop.SkillData[] skills;//已学习
         public SkillTips[] skillTips;//已获得启示
+        public int[] disable_skill_id_array;//已消除负面技能
         public int[] chara_effect_id_array;//状态
         public int[] available_command_array;//所有有效的出行
         public int[][] proper_info;//适性信息，用于技能选择
@@ -558,6 +559,7 @@ namespace UmamusumeResponseAnalyzer.AI
             skills = @event.data.chara_info.skill_array;
             skillTips = @event.data.chara_info.skill_tips_array;
             chara_effect_id_array = @event.data.chara_info.chara_effect_id_array;
+            disable_skill_id_array = @event.data.chara_info.disable_skill_id_array;
 
             umaId = @event.data.chara_info.card_id + 1000000 * @event.data.chara_info.rarity;
             talent_level = @event.data.chara_info.talent_level;
