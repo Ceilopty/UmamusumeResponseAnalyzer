@@ -187,6 +187,34 @@ namespace UmamusumeResponseAnalyzer
                     }
                     #endregion
                     #endregion
+                    #region Q包绕行
+                    //手机及模拟器未hookQ包，在此由command_result解析上回合选项，替代ParseTrainingRequest
+                    //先处理训练结果再更新回合
+                    if (dyn.data.command_result != null) // 训练结果                        
+                    {
+                        if (GameStats.stats[GameStats.currentTurn] != null)
+                        {
+                            int rawId = dyn.data.command_result.command_id;
+#if DEBUG
+                            AnsiConsole.MarkupLine($"turn: {GameStats.currentTurn}, id:{rawId}, sub:{dyn.data.command_result.sub_id}, state:{dyn.data.command_result.result_state}");
+#endif
+                            var trainingId = GameGlobal.ToTrainId[rawId];
+                            AnsiConsole.MarkupLine($"玩家点击了[aqua]{GameGlobal.TrainNames[trainingId]}[/]{(trainingId < 107 ? "训练" : "")}");
+                            GameStats.stats[GameStats.currentTurn].playerChoice = trainingId;
+                            //绕行结束，下面是前移的内容
+                            if (dyn.data.command_result.result_state == 1) // 训练失败
+                            {
+                                AnsiConsole.MarkupLine($"[red]训练失败！[/]");
+                                //无需重复判断
+                                //if (GameStats.stats[GameStats.currentTurn] != null)
+                                GameStats.stats[GameStats.currentTurn].isTrainingFailed = true;
+                            }
+                        }
+                        EventLogger.Start(dyn.ToObject<Gallop.SingleModeCheckEventResponse>()); //开始记录事件，跳过从上一次调用update到这里的所有事件和训练
+                    }
+                    //前移内容结束
+                    #endregion
+                    //为了避免提前解析CommandInfo更新GameStats.currentTurn而训练结果还没登记，这里交换顺序
                     if (data.chara_info != null && data.home_info?.command_info_array != null && data.race_reward_info == null && !(data.chara_info.state == 2 || data.chara_info.state == 3)) //根据文本简单过滤防止重复、异常输出
                     {
                         if (Config.Get(Localization.Config.I18N_ShowCommandInfo))
@@ -211,6 +239,7 @@ namespace UmamusumeResponseAnalyzer
                             }
                         }
                     }
+                    /* 此部分已被提前处理
                     if (dyn.data.command_result != null) // 训练结果
                     {
                         if (dyn.data.command_result.result_state == 1) // 训练失败
@@ -221,6 +250,7 @@ namespace UmamusumeResponseAnalyzer
                         }
                         EventLogger.Start(dyn.ToObject<Gallop.SingleModeCheckEventResponse>()); // 开始记录事件，跳过从上一次调用update到这里的所有事件和训练
                     }
+                    */
                     if (data.chara_info != null && data.unchecked_event_array?.Count > 0)
                     {
                         if (Config.Get(Localization.Config.I18N_ParseSingleModeCheckEventResponse))
@@ -380,6 +410,7 @@ namespace UmamusumeResponseAnalyzer
                         Directory.CreateDirectory(directory);
                     }
                     File.WriteAllBytes($"{directory}/{DateTime.Now:yy-MM-dd HH-mm-ss-fff}R.msgpack", buffer);
+                    File.WriteAllText($"{directory}/Turn{GameStats.currentTurn}_{DateTime.Now:yy-MM-dd HH-mm-ss-fff}R.json", JObject.Parse(MessagePackSerializer.ConvertToJson(buffer)).ToString()); //便于读取
                 }
                 _ = Task.Run(() => ParseResponse(buffer));
             }

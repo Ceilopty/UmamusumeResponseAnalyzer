@@ -1,6 +1,7 @@
 ﻿using Spectre.Console;
 using UmamusumeResponseAnalyzer.Entities;
 using UmamusumeResponseAnalyzer.Game;
+using UmamusumeResponseAnalyzer.AI;
 using static UmamusumeResponseAnalyzer.Localization.Handlers.ParseSingleModeCheckEventResponse;
 
 namespace UmamusumeResponseAnalyzer.Handler
@@ -11,9 +12,10 @@ namespace UmamusumeResponseAnalyzer.Handler
         {
             // 这时当前事件还没有生效，先显示上一个事件的收益
             EventLogger.Update(@event);
-
+            var eventCount = 0;//AI文件区分事件
             foreach (var i in @event.data.unchecked_event_array)
             {
+                eventCount += 1;
                 if (GameStats.stats[GameStats.currentTurn] != null)
                 {
                     if (i.story_id == 830137001)//第一次点击女神
@@ -146,8 +148,22 @@ namespace UmamusumeResponseAnalyzer.Handler
                     AnsiConsole.Write(mainTree);
 
                 }
+                // 发送UAT所需Event信息，多个选项才发
+                if (Config.Get(Localization.Config.I18N_WriteAIInfo) && i?.event_contents_info?.choice_array.Length > 1)
+                {
+                    var eventToSend = new EventSend(@event, eventCount);
+                    eventToSend.doSend();
+                }
             }
-
+            // 根据剧本发送回合信息
+            if (Config.Get(Localization.Config.I18N_WriteAIInfo))
+            {
+                var gameStatusToSend = @event.data.chara_info.scenario_id switch
+                {
+                    1 => new GameStatusSend_Ura(@event)
+                };
+                gameStatusToSend.doSend();
+            }    
         }
     }
 }

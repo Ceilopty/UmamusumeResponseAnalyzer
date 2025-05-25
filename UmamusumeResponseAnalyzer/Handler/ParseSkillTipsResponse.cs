@@ -115,6 +115,11 @@ namespace UmamusumeResponseAnalyzer.Handler
                 AnsiConsole.MarkupLine(I18N_ExpectedCostEffectivenessByPrice, t * 50, eff.ToString("F3"));
             }
             #endregion
+            var gameStatusToSend = @event.data.chara_info.scenario_id switch
+                {
+                    1 => new AI.GameStatusSend_Ura(@event)
+                };
+                gameStatusToSend.doSend();
         }
         public static IEnumerable<SkillData> ReplaceAllSkillWithUpgradeSkill(Gallop.SingleModeCheckEventResponse @event, SkillManager skillmanager, IEnumerable<TalentSkillData> upgradableTalentSkills, List<SkillData> willLearnSkills)
         {
