@@ -687,6 +687,9 @@ namespace UmamusumeResponseAnalyzer.Handler
                                     case 30207 or 10109:    // 理事长
                                         turnStat.cook_friendAtTrain[trainIdx] = true;
                                         break;
+                                    case 30036 or 10060:    // 樫本理子
+                                        turnStat.aoharu_rikoAtTrain[trainIdx] = true;
+                                        break;
                                 }
                             }
                             else if (friendship < 80) // 羁绊不满80，无法触发友情训练标黄
@@ -1054,6 +1057,24 @@ namespace UmamusumeResponseAnalyzer.Handler
                 catch (Exception e)
                 {
                     AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
+                }
+            }//if
+            //发送AI所需信息
+            if (@event.IsScenario(ScenarioType.Aoharu))
+            {
+                try
+                {
+                    var gameStatusToSend = new GameStatusSend_Aoharu<AoharuPerson>(@event);
+                    SubscribeAiInfo.Signal(gameStatusToSend);
+                    if (Config.Get(Localization.Config.I18N_WriteAIInfo))
+                        gameStatusToSend.doSend();
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
+#if DEBUG
+                    throw;
+#endif
                 }
             }//if
             if (@event.IsScenario(ScenarioType.LArc))

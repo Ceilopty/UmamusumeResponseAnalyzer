@@ -1,4 +1,5 @@
 ﻿using Spectre.Console;
+using UmamusumeResponseAnalyzer.AI;
 using UmamusumeResponseAnalyzer.Entities;
 using UmamusumeResponseAnalyzer.Game;
 using static UmamusumeResponseAnalyzer.Localization.Handlers.ParseSkillTipsResponse;
@@ -115,11 +116,26 @@ namespace UmamusumeResponseAnalyzer.Handler
                 AnsiConsole.MarkupLine(I18N_ExpectedCostEffectivenessByPrice, t * 50, eff.ToString("F3"));
             }
             #endregion
-            var gameStatusToSend = @event.data.chara_info.scenario_id switch
+            if (Config.Get(Localization.Config.I18N_WriteAIInfo))
+            {
+                switch (@event.data.chara_info.scenario_id)
                 {
-                    1 => new AI.GameStatusSend_Ura(@event)
-                };
-                gameStatusToSend.doSend();
+                    case 1:
+                        {
+                            var gameStatusToSend = new GameStatusSend_Ura(@event);
+                            gameStatusToSend.doSend();
+                            break;
+                        }
+                    case 2:
+                        {
+                            var gameStatusToSend = new GameStatusSend_Aoharu<AoharuPerson>(@event);
+                            gameStatusToSend.doSend();
+                            break;
+                        }
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
         }
         public static IEnumerable<SkillData> ReplaceAllSkillWithUpgradeSkill(Gallop.SingleModeCheckEventResponse @event, SkillManager skillmanager, IEnumerable<TalentSkillData> upgradableTalentSkills, List<SkillData> willLearnSkills)
         {

@@ -52,6 +52,8 @@ namespace UmamusumeResponseAnalyzer.Game
         public bool[] ura_tsyAtTrain;//桐生院是否在这个训练
         public bool[] ura_lmAtTrain;//绿帽是否在这个训练
 
+        //青春杯
+        public bool[] aoharu_rikoAtTrain;//樫本理子是否在这个训练
         //凯旋门
         public bool[] larc_zuoyueAtTrain;//佐岳是否在这个训练
         public bool larc_playerChoiceSS;//这个回合玩家是不是点的ss训练
@@ -97,6 +99,8 @@ namespace UmamusumeResponseAnalyzer.Game
             for (int j = 0; j < 5; j++) ura_tsyAtTrain[j] = false;
             ura_lmAtTrain = new bool[5];//绿帽是否在这个训练
             for (int j = 0; j < 5; j++) ura_lmAtTrain[j] = false;
+            aoharu_rikoAtTrain = new bool[5];//樫本理子是否在这个训练
+            for (int j = 0; j < 5; j++) aoharu_rikoAtTrain[j] = false;
             larc_zuoyueAtTrain = new bool[5];//佐岳是否在这个训练
             for (int j = 0; j < 5; j++) larc_zuoyueAtTrain[j] = false;
             larc_playerChoiceSS = false;

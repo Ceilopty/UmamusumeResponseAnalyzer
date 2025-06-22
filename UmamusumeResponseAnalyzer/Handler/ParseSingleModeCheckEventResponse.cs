@@ -158,11 +158,23 @@ namespace UmamusumeResponseAnalyzer.Handler
             // 根据剧本发送回合信息
             if (Config.Get(Localization.Config.I18N_WriteAIInfo))
             {
-                var gameStatusToSend = @event.data.chara_info.scenario_id switch
+                switch (@event.data.chara_info.scenario_id)
                 {
-                    1 => new GameStatusSend_Ura(@event)
-                };
-                gameStatusToSend.doSend();
+                    case 1:
+                        {
+                            var gameStatusToSend = new GameStatusSend_Ura(@event);
+                            gameStatusToSend.doSend();
+                            break;
+                        }
+                    case 2:
+                        {
+                            var gameStatusToSend = new GameStatusSend_Aoharu<AoharuPerson>(@event);
+                            gameStatusToSend.doSend();
+                            break;
+                        }
+                    default:
+                        throw new NotImplementedException();
+                }
             }    
         }
     }

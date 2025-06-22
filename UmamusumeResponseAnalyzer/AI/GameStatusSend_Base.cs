@@ -367,7 +367,7 @@ namespace UmamusumeResponseAnalyzer.AI
             if (wsSubscribeCount > 0 && !this.isRepeatTurn())
                 AnsiConsole.MarkupLine("\n[aqua]AI计算中...[/]");
 
-            var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData");
+            var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData", "Turn");
             Directory.CreateDirectory(currentGSdirectory);
             var success = false;
             var tried = 0;

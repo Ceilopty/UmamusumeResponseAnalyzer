@@ -304,6 +304,7 @@ namespace UmamusumeResponseAnalyzer.Game
 
         public static readonly Dictionary<int, int[]> FiveStatusLimit = new Dictionary<int, int[]>
         {
+            { 2, [ 1200, 1200, 1200, 1200, 1200] },
             { 6, [ 2000, 2000, 1800, 1800, 1400] },
             { 7, [ 2200, 1800, 1800, 1800, 1400] },
             { 8, [ 2300, 1000, 2200, 2200, 1500] },
