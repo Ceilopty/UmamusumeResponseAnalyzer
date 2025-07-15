@@ -258,18 +258,21 @@ namespace UmamusumeResponseAnalyzer.Handler
                 _ => throw new NotImplementedException()
             };
             // 发送UAT所需JJC信息
-            try
+            if (data.opponent_info_array != null)
             {
-                var gameStatusToSend = new TeamStadiumSend(@event);
-                if (Config.Get(Localization.Config.I18N_WriteAIInfo))
-                    gameStatusToSend.doSend();
-            }
-            catch (Exception e)
-            {
-                AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
+                try
+                {
+                    var gameStatusToSend = new TeamStadiumSend(@event);
+                    if (Config.Get(Localization.Config.I18N_WriteAIInfo))
+                        gameStatusToSend.doSend();
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.MarkupLine($"[red]向AI发送数据失败！错误信息：{Environment.NewLine}{e.Message}[/]");
 #if DEBUG
-                throw;
+                    throw;
 #endif
+                }
             }
         }
     }

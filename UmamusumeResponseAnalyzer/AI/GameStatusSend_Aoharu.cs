@@ -84,7 +84,7 @@ namespace UmamusumeResponseAnalyzer.AI
         {
             islegal = false;
             playing_state = @event.data.chara_info.playing_state;
-            if ((@event.data.unchecked_event_array != null && @event.data.unchecked_event_array.Length > 0)) return;
+            //if ((@event.data.unchecked_event_array != null && @event.data.unchecked_event_array.Length > 0)) return;
             if (
                 (@event.data.chara_info.playing_state == 1) ||
                 (@event.data.chara_info.playing_state == 26 && @event.IsScenario(ScenarioType.Mecha)) 
@@ -95,14 +95,14 @@ namespace UmamusumeResponseAnalyzer.AI
             else
             {
                 //重复显示的回合直接return，就不发了
-                return;
+                //return; //不能不发啊
             }
 
             //if(@event.data.race_start_info != null)
-            isRacing = true;
+            // isRacing = true;
             for (var i = 0; i < 5; i++)
             {
-                isRacing &= (@event.data.home_info.command_info_array[i].is_enable == 0);
+                // isRacing &= (@event.data.home_info.command_info_array[i].is_enable == 0);
             }
             
             islegal = true;
