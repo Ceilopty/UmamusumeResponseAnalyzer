@@ -222,4 +222,7 @@
   <data name="I18N_Language" xml:space="preserve">
     <value>语言</value>
   </data>
+  <data name="I18N_ParseCircleResponse" xml:space="preserve">
+    <value>解析社团成员</value>
+  </data>
 </root>

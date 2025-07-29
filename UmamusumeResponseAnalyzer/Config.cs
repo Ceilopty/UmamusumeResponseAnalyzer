@@ -41,6 +41,7 @@ namespace UmamusumeResponseAnalyzer
                 I18N_ParsePracticeRaceRaceStartResponse,
                 I18N_ParseRoomMatchRaceStartResponse,
                 I18N_ParseChampionsRaceStartResponse,
+                I18N_ParseCircleResponse,
                 I18N_MaximiumGradeSkillRecommendation,
                 I18N_ShowCommandInfo
             ));

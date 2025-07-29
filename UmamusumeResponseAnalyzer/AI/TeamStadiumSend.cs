@@ -96,7 +96,7 @@ namespace UmamusumeResponseAnalyzer.AI
             } while (!success && tried < 10);
             if (!success)
             {
-                AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/thisTurn.json失败！[/]");
+                AnsiConsole.MarkupLine($@"[red]写入{currentGSdirectory}/TeamStadium.json失败！[/]");
             }
         }
     }

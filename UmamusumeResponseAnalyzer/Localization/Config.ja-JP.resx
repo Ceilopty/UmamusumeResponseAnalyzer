@@ -222,4 +222,7 @@
   <data name="I18N_Language_AutoDetect" xml:space="preserve">
     <value>自動検出</value>
   </data>
+  <data name="I18N_ParseCircleResponse" xml:space="preserve">
+    <value>サークルメンバーを解析</value>
+  </data>
 </root>

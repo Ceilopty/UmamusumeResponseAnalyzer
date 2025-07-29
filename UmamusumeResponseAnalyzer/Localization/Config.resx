@@ -222,4 +222,7 @@
   <data name="I18N_Language" xml:space="preserve">
     <value>Language</value>
   </data>
+  <data name="I18N_ParseCircleResponse" xml:space="preserve">
+    <value>Analyze circle members</value>
+  </data>
 </root>

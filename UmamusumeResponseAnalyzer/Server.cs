@@ -293,6 +293,11 @@ namespace UmamusumeResponseAnalyzer
                         if (Config.Get(Localization.Config.I18N_ParseChampionsRaceStartResponse))
                             Handlers.ParseChampionsRaceStartResponse(dyn.ToObject<Gallop.ChampionsFinalRaceStartResponse>());
                     }
+                    if (data.circle_info != null && data.summary_user_info_array != null)
+                    {
+                        if (Config.Get(Localization.Config.I18N_ParseCircleResponse))
+                            Handlers.ParseCircleResponse(dyn.ToObject<Gallop.CircleResponse>());
+                    }
                     if (dyn.data_headers.server_list != null && dyn.data_headers.server_list.resource_server_login != null)
                     {
                         AnsiConsole.MarkupLine(I18N_LoginRequestDetected, dyn.data_headers.viewer_id);
