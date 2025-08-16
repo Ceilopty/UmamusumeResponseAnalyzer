@@ -57,7 +57,7 @@ namespace UmamusumeResponseAnalyzer.AI
         }
         public async void doSend()
         {
-            var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData");
+            var currentGSdirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "UmamusumeResponseAnalyzer", "GameData", "Circle");
             Directory.CreateDirectory(currentGSdirectory);
 
             var success = false;
