@@ -39,9 +39,9 @@ namespace UmamusumeResponseAnalyzer.AI
             name = @event.data.circle_info.name;
             member_num = @event.data.circle_info.member_num;
             members = new CircleMember[member_num];
-            for (var i = 0; i < member_num; i++)
+             for (var i = 0; i < member_num; i++)
             {
-                var user = @event.data.summary_user_info_array[i];
+                var user = @event.data.summary_user_info_array.First(x=>x.viewer_id== @event.data.circle_user_array[i].viewer_id);
                 members[i] = new CircleMember
                 {
                     viewer_id = user.viewer_id,

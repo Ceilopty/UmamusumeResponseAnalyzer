@@ -61,12 +61,12 @@ namespace UmamusumeResponseAnalyzer.Handler
             foreach (var i in @event.data.summary_user_info_array.OrderByDescending(x => x.last_login_time))
             {
                 var memberline = new List<string> {};
-                var membership = @event.data.circle_user_array.First(x => x.viewer_id == i.viewer_id).membership switch
+                var membership = @event.data.circle_user_array.FirstOrDefault(x => x?.viewer_id == i.viewer_id, null)?.membership switch
                 {
                     1 => "[green]成员[/]",
                     2 => "[aqua]副团长[/]",
                     3 => "[red]团长[/]",
-                    _ => ""
+                    _ => "前成员"
                 };
                 memberline.Add(membership);
                 memberline.Add(i.name);
