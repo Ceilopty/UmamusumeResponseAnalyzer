@@ -32,6 +32,7 @@ namespace UmamusumeResponseAnalyzer.AI
         //bool larc_isLinkCard;//是否为link支援卡
         //isShining, larc_isLinkCard, distribution 在ai里计算
         public int trainType;//如果是支援卡，则是其names.br中的Type；否则为-1
+        public int member_state;
 
         public UATPerson()
         {
@@ -42,6 +43,7 @@ namespace UmamusumeResponseAnalyzer.AI
             isHint = false;
             cardRecord = 0;
             trainType = -1;
+            member_state = 0;
         }
     }
     public class GameStatusSend_UAT

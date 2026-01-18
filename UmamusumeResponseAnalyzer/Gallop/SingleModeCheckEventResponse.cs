@@ -31,6 +31,8 @@ namespace Gallop
             public SingleModeRaceCondition[] race_condition_array;
             [Key("race_start_info")]
             public SingleRaceStartInfo race_start_info;
+            [Key("ura_data_set")] //URA
+            public SingleModeUraDataSet ura_data_set; 
             [Key("team_data_set")] //青春杯
             public SingleModeTeamDataSet team_data_set; 
             [Key("free_data_set")] //巅峰杯

@@ -18,10 +18,12 @@ namespace UmamusumeResponseAnalyzer.AI
     /// </summary>
     public class UraPerson:UATPerson
     {
+        //0代表未加载（例如前两个回合的npc），1代表桐生院支援卡（R或SR都行），2代表普通支援卡，3代表绿帽支援卡，4理事长，5记者，6不带卡的桐生院，7米可。暂不支持其他友人/团队卡
+        //public new int personType = 0;
     }
     public class GameStatusSend_Ura:GameStatusSend_UAT
     {
-        public new UraPerson[] persons;//如果不带其他友人团队卡，最多10个头。依次是普通支援卡（顺序随意）：0~3到5，绿帽支援卡6, 理事长7，记者8，桐生院9（带没带卡都是9），
+        public new UraPerson[] persons;//如果不带其他友人团队卡，最多11个头。依次是普通支援卡（顺序随意）：0~3到5，绿帽支援卡6, 理事长7，记者8，桐生院9（带没带卡都是9），米克10
         //public int ura_tsyType;//没带桐生院=0，带的SR卡=1，带的R卡=2
         //public int ura_lmType;//没带绿帽=0，带的SSR卡=1，带的R卡=2
         //public double larc_zuoyueVitalBonus;//佐岳卡的回复量倍数（满破1.8）
@@ -35,9 +37,12 @@ namespace UmamusumeResponseAnalyzer.AI
         public bool ura_lmOutgoingUnlocked;//绿帽外出解锁
         public bool ura_lmOutgoingRefused;//是否拒绝了绿帽外出
         public int ura_lmOutgoingUsed;//绿帽外出走了几段了
+
+        public int versus_level = 0;//米可对决等级
+        public bool versus_event = false;//米可对决发生
         public GameStatusSend_Ura (Gallop.SingleModeCheckEventResponse @event) : base(@event)
         {
-            persons = new UraPerson[10];
+            persons = new UraPerson[11];
             personDistribution = new int[5, 5];
             for (var i = 0; i < 5; i++)
             {
@@ -50,7 +55,7 @@ namespace UmamusumeResponseAnalyzer.AI
             var headIdConvert = new Dictionary<int, int>();
             var ura_tsyType = 0;
             var ura_lmType = 0;
-            for (var i = 0; i < 10; i++)
+            for (var i = 0; i < 11; i++)
                 persons[i] = new UraPerson();
             normalCardCount = 0;
 
@@ -170,6 +175,7 @@ namespace UmamusumeResponseAnalyzer.AI
             persons[7].personType = 4;
             persons[8].personType = 5;
             persons[9].personType = ura_tsyType == 0 ? 6 : 1;
+            persons[10].personType = 7;
 
             if (ura_lmType == 0)
                 headIdConvert[101] = 6;
@@ -177,6 +183,7 @@ namespace UmamusumeResponseAnalyzer.AI
             headIdConvert[103] = 8;
             if (ura_tsyType == 0)
                 headIdConvert[104] = 9;
+            headIdConvert[2001] = 10;
 
             //if (turnNum >= 3)
             //{
@@ -206,6 +213,20 @@ namespace UmamusumeResponseAnalyzer.AI
                 var p = headIdConvert[s.target_id];
                 persons[p].friendship = s.evaluation;
             }
+            //URA信息
+            if (@event.data.chara_info.turn >= 3)
+            {
+                versus_level = @event.data.ura_data_set.versus_level;
+                if (headIdConvert.ContainsValue(10)) 
+                { 
+                    var chara_id = @event.data.ura_data_set.evaluation_info_array.First(x => x.target_id == headIdConvert.First(x => x.Value == 10).Key)?.chara_id;
+                    if (chara_id is not null)
+                    {
+                        var p = @event.data.ura_data_set.evaluation_info_array.First(x => x.chara_id == chara_id);
+                        persons[10].member_state = p.member_state;
+                    }
+                 }
+            }
 
             if (@event.data.home_info == null) return;
             var available_command_num = 0;
@@ -228,6 +249,18 @@ namespace UmamusumeResponseAnalyzer.AI
                 {
                     var pid = headIdConvert[p];
                     persons[pid].isHint = true;
+                }
+            }
+            foreach (var train in @event.data.ura_data_set.command_info_array)
+            {
+                //Console.WriteLine(train.command_id);
+                if (!GameGlobal.ToTrainIndex.ContainsKey(train.command_id))//不是正常训练
+                    continue;
+                //Console.WriteLine("!");
+                var versus_event_partner_id = train.versus_event_partner_id;
+                if (versus_event_partner_id.HasValue){
+                    versus_event = true;
+                    break;
                 }
             }
         }
